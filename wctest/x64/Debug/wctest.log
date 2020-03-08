@@ -1,0 +1,4 @@
+﻿  wctest.cpp
+wctest.obj : error LNK2005: "int __cdecl character(char *)" (?character@@YAHPEAD@Z) 已经在 源.obj 中定义
+    正在创建库 E:\wc\x64\Debug\wctest.lib 和对象 E:\wc\x64\Debug\wctest.exp
+E:\wc\x64\Debug\wctest.dll : fatal error LNK1169: 找到一个或多个多重定义的符号

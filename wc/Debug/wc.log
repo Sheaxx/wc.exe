@@ -1,0 +1,6 @@
+﻿  源.cpp
+E:\wc\wc\wc\源.cpp(5,31): error C2084: 函数“int character(char *)”已有主体
+E:\wc\wc\wc\wc.h(3): message : 参见“character”的前一个定义
+E:\wc\wc\wc\源.cpp(132,7): error C2065: “character”: 未声明的标识符
+E:\wc\wc\wc\源.cpp(132,25): error C2568: “=”: 无法解析函数重载
+E:\wc\wc\wc\源.cpp(132,25): message : 可能是“int character(char *)”
