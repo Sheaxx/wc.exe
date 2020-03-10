@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <io.h>
 #include "wc.h"
 
 int charactercount(char* filename) {//统计字符数
@@ -119,15 +120,52 @@ int linecount2(char* filename) {//统计空行、代码行和注释行
 			}
 		}
 	}
+	printf("%s文件中：\n",filename);
 	printf("文件中的空行数为%d。\n", k);
 	printf("文件中的代码行数为%d。\n", d);
 	printf("文件中的注释行数为%d。\n", z);
 	fclose(fp);
-	return k+d+z;
+	return k+d+z;//用于检测
+}
+
+void searchfile(char *path,char *mode,char *str) {//递归处理文件
+	struct _finddata_t file;
+	intptr_t Handle;
+	char way[100] = { '\0' };
+	strcpy_s(way, path);
+	strcat_s(way, "\\");
+	strcat_s(way, mode);
+	if ((Handle = _findfirst(way, &file)) == -1L) {
+		printf("没有找到文件。\n");
+		return;
+	}
+	do {
+		if (file.attrib == _A_SUBDIR) {//该文件是文件夹
+			if ((strcmp(file.name, ".") != 0) && (strcmp(file.name, "..") != 0)) {
+				strcat_s(way, "\\");
+				strcat_s(way, file.name);
+				searchfile(way, mode, str);//进入文件夹继续处理
+			}
+			
+		}
+		else {//根据输入的操作指令对文件进行操作
+			if (strcmp(str, "-c") == 0)
+				printf("%s文件中共有%d个字符。\n", file.name, charactercount(file.name));
+			else if (strcmp(str, "-w") == 0)
+				printf("%s文件中共有%d个单词。\n", file.name, wordcount(file.name));
+			else if (strcmp(str, "-l") == 0)
+				printf("%s文件中共有%d行。\n", file.name, linecount1(file.name));
+			else if (strcmp(str, "-a") == 0)
+				linecount2(file.name);
+		}
+	}while(_findnext(Handle, &file) == 0);
+	_findclose(Handle);//结束查找
 }
 
 int main(int argc, char* argv[]) {
 	int c = 0, w = 0, l = 0, a = 0;
+	char path[50] = { '\0' };
+	char mode[20] = { '\0' };
 	if (strcmp(argv[1], "-c") == 0) {
 		c = charactercount(argv[2]);
 		printf("文件中的字符数为%d。\n", c);
@@ -143,6 +181,13 @@ int main(int argc, char* argv[]) {
 	else if (strcmp(argv[1], "-a") == 0) {
 		a = linecount2(argv[2]);
 		if (a == 0)printf("文件为空。\n");
+	}
+	else if (strcmp(argv[1], "-s") == 0) {
+		printf("请输入文件路径：");
+		scanf_s("%s", path, 50);
+		printf("请输入文件名称：");
+		scanf_s("%s", mode, 20);
+		searchfile(path, mode, argv[2]);
 	}
 	else printf("输入错误。\n");
 }
