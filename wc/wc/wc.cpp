@@ -131,35 +131,40 @@ int linecount2(char* filename) {//统计空行、代码行和注释行
 void searchfile(char *path,char *mode,char *str) {//递归处理文件
 	struct _finddata_t file;
 	intptr_t Handle;
-	char way[100] = { '\0' };
-	strcpy_s(way, path);
-	strcat_s(way, "\\");
-	strcat_s(way, mode);
-	if ((Handle = _findfirst(way, &file)) == -1L) {
+	char way1[100] = { '\0' };
+	char way2[100] = { '\0' };
+	strcpy_s(way1, path);
+	strcpy_s(way2, path);
+	strcat_s(way1, "\\");
+	strcat_s(way1, mode);
+	if ((Handle = _findfirst(way1, &file)) == -1L) 
 		printf("没有找到文件。\n");
-		return;
-	}
-	do {
-		if (file.attrib == _A_SUBDIR) {//该文件是文件夹
-			if ((strcmp(file.name, ".") != 0) && (strcmp(file.name, "..") != 0)) {
-				strcat_s(way, "\\");
-				strcat_s(way, file.name);
-				searchfile(way, mode, str);//进入文件夹继续处理
+	else {
+		do {
+			if (file.attrib & _A_SUBDIR) {//该文件是文件夹
+				if ((strcmp(file.name, ".") != 0) && (strcmp(file.name, "..") != 0)) {
+					//printf("ccc\n");
+					if (strcmp(mode, "*") == 0 || strcmp(mode,"*.*") == 0) {
+						strcat_s(way2, "\\");
+						strcat_s(way2, file.name);
+						searchfile(way2, mode, str);
+					}
+					else searchfile(way1, mode, str);//进入文件夹继续处理
+				}
 			}
-			
-		}
-		else {//根据输入的操作指令对文件进行操作
-			if (strcmp(str, "-c") == 0)
-				printf("%s文件中共有%d个字符。\n", file.name, charactercount(file.name));
-			else if (strcmp(str, "-w") == 0)
-				printf("%s文件中共有%d个单词。\n", file.name, wordcount(file.name));
-			else if (strcmp(str, "-l") == 0)
-				printf("%s文件中共有%d行。\n", file.name, linecount1(file.name));
-			else if (strcmp(str, "-a") == 0)
-				linecount2(file.name);
-		}
-	}while(_findnext(Handle, &file) == 0);
-	_findclose(Handle);//结束查找
+			else {//根据输入的操作指令对文件进行操作
+				if (strcmp(str, "-c") == 0)
+					printf("%s文件中共有%d个字符。\n", file.name, charactercount(file.name));
+				else if (strcmp(str, "-w") == 0)
+					printf("%s文件中共有%d个单词。\n", file.name, wordcount(file.name));
+				else if (strcmp(str, "-l") == 0)
+					printf("%s文件中共有%d行。\n", file.name, linecount1(file.name));
+				else if (strcmp(str, "-a") == 0)
+					linecount2(file.name);
+			}
+		} while (_findnext(Handle, &file) == 0);
+		_findclose(Handle);//结束查找
+	}
 }
 
 int main(int argc, char* argv[]) {
