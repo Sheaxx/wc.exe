@@ -1,3 +1,3 @@
 ﻿  wc.cpp
-E:\wc.exe\wc\wc\wc.cpp(193): warning C4715: “searchfile”: 不是所有的控件路径都返回值
+E:\wc.exe\wc\wc\wc.cpp(200): warning C4715: “searchfile”: 不是所有的控件路径都返回值
   wc.vcxproj -> E:\wc.exe\wc\Debug\wc.exe
