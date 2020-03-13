@@ -18,15 +18,23 @@ namespace wctest
 			Assert::AreEqual(wordcount(path, name), 4);
 			Assert::AreEqual(linecount1(path, name), 7);
 			Assert::AreEqual(linecount2(path, name), 17);
+			
 
-			Assert::AreEqual(searchfile("\0", "-c", name), 18);
-			Assert::AreEqual(searchfile("\0", "-c", "*.c"), 21);
-			Assert::AreEqual(searchfile("\0", "-w", name), 4);
-			Assert::AreEqual(searchfile("\0", "-w", "*.c"), 5);
-			Assert::AreEqual(searchfile("\0", "-l", name), 7);
-			Assert::AreEqual(searchfile("\0", "-l", "*.c"), 8);
-			Assert::AreEqual(searchfile("\0", "-a", name), 17);
-			Assert::AreEqual(searchfile("\0", "-a", "*.c"), 18);
+			Assert::AreEqual(searchfile(path, "-c", name), 18);
+			Assert::AreEqual(searchfile(path, "-c", "*.c"), 30);
+			Assert::AreEqual(searchfile(path, "-c", "fil?.c"), 27);
+		
+			Assert::AreEqual(searchfile(path, "-w", name), 4);
+			Assert::AreEqual(searchfile(path, "-w", "*.c"), 6);
+			Assert::AreEqual(searchfile(path, "-w", "fil?.c"), 5);
+
+			Assert::AreEqual(searchfile(path, "-l", name), 7);
+			Assert::AreEqual(searchfile(path, "-l", "*.c"), 9);
+			Assert::AreEqual(searchfile(path, "-l", "fil?.c"), 8);
+
+			Assert::AreEqual(searchfile(path, "-a", name), 17);
+			Assert::AreEqual(searchfile(path, "-a", "*.c"), 19);
+			Assert::AreEqual(searchfile(path, "-a", "fil?.c"), 18);
 		}
 	};
 }

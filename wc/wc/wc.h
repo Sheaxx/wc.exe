@@ -6,6 +6,6 @@ int charactercount(char* path, char* filename);
 int wordcount(char* path, char* filename);
 int linecount1(char* path, char* filename);
 int linecount2(char* path, char* filename);
-int searchfile(char* path, char* mode, char* str);
+int searchfile(char* path, char* op, char* mode);
 
 #endif

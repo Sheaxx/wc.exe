@@ -128,7 +128,7 @@ int linecount2(char*path,char* filename) {//统计空行、代码行和注释行
 						while (str[j] != '\n' && str[j] != '*' && str[j + 1] != '/')
 							j++;
 						if (str[j] == '*' && str[j + 1] == '/')
-							tag = true;//标记
+							tag = true;//注释行结束，重置标记
 					}
 					break;
 				}
@@ -156,7 +156,7 @@ int linecount2(char*path,char* filename) {//统计空行、代码行和注释行
 	return k * k + d * d + z * z;//用于检测结果是否正确
 }
 
-int searchfile(char *path, char *str1, char *str2) {//递归处理文件
+int searchfile(char *path, char *op, char *mode) {//递归处理文件
 	struct _finddata_t file1;
 	struct _finddata_t file2;
 	intptr_t Handle1;
@@ -171,10 +171,10 @@ int searchfile(char *path, char *str1, char *str2) {//递归处理文件
 	strcpy_s(way3, path);
 	strcpy_s(way4, path);
 	strcat_s(way1, "*");
-	strcat_s(way2, str2);
+	strcat_s(way2, mode);
 
 	if ((Handle1 = _findfirst(way1, &file1)) == -1L) {//Handle1查找所有文件
-		printf("没有找到文件。\n");
+		printf("%s中没有找到符合文件。\n",way4);
 	}
 	else {
 		do {
@@ -182,7 +182,7 @@ int searchfile(char *path, char *str1, char *str2) {//递归处理文件
 				if ((strcmp(file1.name, ".") != 0) && (strcmp(file1.name, "..") != 0)) {
 					strcat_s(way4, file1.name);
 					strcat_s(way4, "\\");
-					s += searchfile(way4, str1, str2);
+					s += searchfile(way4, op, mode);
 				}//拼接地址，递归继续查找
 			}
 		}while(_findnext(Handle1, &file1) == 0);
@@ -190,29 +190,29 @@ int searchfile(char *path, char *str1, char *str2) {//递归处理文件
 	}
 
 	if ((Handle2 = _findfirst(way2, &file2)) == -1L) {//Handle2查找特定文件
-		printf("没有找到文件。\n");
+		printf("%s中没有找到符合文件。\n",way3);
 	}
 	else {
 		do {
 			if (file2.attrib & _A_SUBDIR)continue;
 			else if ((strcmp(file2.name, ".") == 0) || (strcmp(file2.name, "..") == 0))continue;
 			
-			if (strcmp(str1, "-c") == 0) {
+			if (strcmp(op, "-c") == 0) {
 				c = charactercount(way3, file2.name);
 				if (c != -1)printf("%s文件中共有%d个字符。\n\n", file2.name, c);
 				s += c;
 			}
-			else if (strcmp(str1, "-w") == 0) {
+			else if (strcmp(op, "-w") == 0) {
 				w = wordcount(way3, file2.name);
 				if (w != -1)printf("%s文件中共有%d个单词。\n\n", file2.name, w);
 				s += w;
 			}
-			else if (strcmp(str1, "-l") == 0) {
+			else if (strcmp(op, "-l") == 0) {
 				l = linecount1(way3, file2.name);
 				if (l != -1)printf("%s文件中共有%d行。\n\n", file2.name, l);
 				s += l;
 			}
-			else if (strcmp(str1, "-a") == 0) {
+			else if (strcmp(op, "-a") == 0) {
 				a = linecount2(way3, file2.name);
 				s += a;
 			}
