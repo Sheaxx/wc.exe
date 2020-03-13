@@ -143,7 +143,7 @@ int linecount2(char* filename) {//统计空行、代码行和注释行
 int searchfile(char* path, char* str1, char* str2) {//递归处理文件
 	struct _finddata_t file;
 	intptr_t Handle;
-	int c, w, l, a, x = 0;
+	int c, w, l, a, s = 0;
 	char way1[100] = { '\0' };
 	char way2[100] = { '\0' };
 	int len;
@@ -152,7 +152,7 @@ int searchfile(char* path, char* str1, char* str2) {//递归处理文件
 	strcat_s(way1, "*");
 	if ((Handle = _findfirst(way1, &file)) == -1L) {
 		printf("没有找到文件。\n");
-		x += -1;
+		s += -1;
 	}
 	else {
 		do {
@@ -160,7 +160,7 @@ int searchfile(char* path, char* str1, char* str2) {//递归处理文件
 				if ((strcmp(file.name, ".") != 0) && (strcmp(file.name, "..") != 0)) {
 					strcpy_s(way1, file.name);
 					strcat_s(way1, "\\");
-					x += searchfile(way1, str1, str2);
+					s += searchfile(way1, str1, str2);
 				}//拼接地址，递归继续查找
 			}
 			else {//根据输入的操作指令对文件进行操作
@@ -171,35 +171,35 @@ int searchfile(char* path, char* str1, char* str2) {//递归处理文件
 				if (strcmp(str1, "-c") == 0) {
 					c = charactercount(way2);
 					if (c != -1)printf("%s文件中共有%d个字符。\n", file.name, c);
-					x += c;
+					s += c;
 				}
 				else if (strcmp(str1, "-w") == 0) {
 					w = wordcount(way2);
 					if (w != -1)printf("%s文件中共有%d个单词。\n", file.name, w);
-					x += w;
+					s += w;
 				}
 				else if (strcmp(str1, "-l") == 0) {
 					l = linecount1(way2);
 					if (l != -1)printf("%s文件中共有%d行。\n", file.name, l);
-					x += l;
+					s += l;
 				}
 				else if (strcmp(str1, "-a") == 0) {
 					a = linecount2(way2);
-					x += a;
+					s += a;
 				}
 				else {
 					printf("输入操作错误。\n");
-					x += -1;
+					s += -1;
 				}
 			}
 		} while (_findnext(Handle, &file) == 0);
 		_findclose(Handle);//结束查找
-		return x;
+		return s;
 	}
 }
 
-int main(int argc, char* argv[]) {
-	int c = 0, w = 0, l = 0, a = 0, x = 0;
+void main(int argc, char* argv[]) {
+	int c = 0, w = 0, l = 0, a = 0, s = 0;
 	char path[50] = { "\0" };
 	char mode = '*';
 	if (strcmp(argv[1], "-c") == 0) {
@@ -219,7 +219,7 @@ int main(int argc, char* argv[]) {
 		if (a == 0)printf("文件为空。\n");
 	}
 	else if (strcmp(argv[1], "-s") == 0) {
-		x = searchfile(path, argv[2], argv[3]);
+		s = searchfile(path, argv[2], argv[3]);
 	}
 	else printf("输入错误。\n");
 }

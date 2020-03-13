@@ -1,3 +1,4 @@
 ﻿  wc.cpp
+E:\wc.exe\wc\wc\wc.cpp(201,35): warning C4326: “main”的返回类型应为“int”而非“void”
 E:\wc.exe\wc\wc\wc.cpp(199): warning C4715: “searchfile”: 不是所有的控件路径都返回值
   wc.vcxproj -> E:\wc.exe\wc\Debug\wc.exe
