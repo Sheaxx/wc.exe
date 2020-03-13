@@ -136,17 +136,19 @@ int linecount2(char* filename) {//统计空行、代码行和注释行
 	printf("%s文件中：\n", filename);
 	printf("文件中的空行数为%d。\n", k);
 	printf("文件中的代码行数为%d。\n", d);
-	printf("文件中的注释行数为%d。\n", z);
+	printf("文件中的注释行数为%d。\n\n", z);
 	return k * k + d * d + z * z;//用于检测结果是否正确
 }
 
-int searchfile(char* path, char* str1, char* str2) {//递归处理文件
+int searchfile(char* path, char* str1, char* str2,int select) {//递归处理文件
 	struct _finddata_t file;
 	intptr_t Handle;
+	intptr_t Handle2;
 	int c, w, l, a, s = 0;
+	int len = 0;
 	char way1[100] = { '\0' };
 	char way2[100] = { '\0' };
-	int len;
+	char way3[100] = { '\0' };
 	strcpy_s(way1, path);
 	strcpy_s(way2, way1);
 	strcat_s(way1, "*");
@@ -160,31 +162,52 @@ int searchfile(char* path, char* str1, char* str2) {//递归处理文件
 				if ((strcmp(file.name, ".") != 0) && (strcmp(file.name, "..") != 0)) {
 					strcpy_s(way1, file.name);
 					strcat_s(way1, "\\");
-					s += searchfile(way1, str1, str2);
+					s += searchfile(way1, str1, str2, select);
 				}//拼接地址，递归继续查找
 			}
 			else {//根据输入的操作指令对文件进行操作
-				len = strlen(file.name);
-				if (file.name[len - 1] != 'c' && file.name[len - 2] != '.')continue;
-				if (strcmp(str2, "*.c") != 0 && strcmp(str2, file.name) != 0)continue;
-				strcat_s(way2, file.name);
+				strcpy_s(way3, way2);
+				switch (select) {
+				case 1:
+					strcat_s(way2, str2);
+					if (Handle2 = _findfirst(way2, &file) == -1L) {
+						continue;
+					}
+					else {
+						strcat_s(way3, file.name);
+					}
+					break;
+				case 2:
+					len = strlen(file.name);
+					if (file.name[len - 1] != 'c' && file.name[len - 2] != '.')continue;
+					strcat_s(way3, file.name);
+					break;
+				case 3:
+					strcat_s(way3, file.name);
+					break;
+				case 4:
+					if (strcmp(str2, file.name) != 0)continue;
+					strcat_s(way3, file.name);
+					break;
+				}
+				printf("路径：%s\n", way3);
 				if (strcmp(str1, "-c") == 0) {
-					c = charactercount(way2);
-					if (c != -1)printf("%s文件中共有%d个字符。\n", file.name, c);
+					c = charactercount(way3);
+					if (c != -1)printf("%s文件中共有%d个字符。\n\n", file.name, c);
 					s += c;
 				}
 				else if (strcmp(str1, "-w") == 0) {
-					w = wordcount(way2);
-					if (w != -1)printf("%s文件中共有%d个单词。\n", file.name, w);
+					w = wordcount(way3);
+					if (w != -1)printf("%s文件中共有%d个单词。\n\n", file.name, w);
 					s += w;
 				}
 				else if (strcmp(str1, "-l") == 0) {
-					l = linecount1(way2);
-					if (l != -1)printf("%s文件中共有%d行。\n", file.name, l);
+					l = linecount1(way3);
+					if (l != -1)printf("%s文件中共有%d行。\n\n", file.name, l);
 					s += l;
 				}
 				else if (strcmp(str1, "-a") == 0) {
-					a = linecount2(way2);
+					a = linecount2(way3);
 					s += a;
 				}
 				else {
@@ -199,9 +222,11 @@ int searchfile(char* path, char* str1, char* str2) {//递归处理文件
 }
 
 void main(int argc, char* argv[]) {
-	int c = 0, w = 0, l = 0, a = 0, s = 0;
+	int c = 0, w = 0, l = 0, a = 0, s = 0, i = 0;
+	int select = 0;
+	bool mark = true;
 	char path[50] = { "\0" };
-	char mode = '*';
+	char mode[50] = { "\0" };
 	if (strcmp(argv[1], "-c") == 0) {
 		c = charactercount(argv[2]);
 		printf("文件中的字符数为%d。\n", c);
@@ -219,7 +244,21 @@ void main(int argc, char* argv[]) {
 		if (a == 0)printf("文件为空。\n");
 	}
 	else if (strcmp(argv[1], "-s") == 0) {
-		s = searchfile(path, argv[2], argv[3]);
+		strcpy_s(mode, argv[3]);
+		while (mode[i] != '\0') {
+			if (mode[i] == '?') {
+				mark = false;
+				break;
+			}
+			else i++;
+		}
+		if (mark == false)select = 1;
+		else {
+			if (strcmp(mode, "*.c") == 0)select = 2;
+			else if (strcmp(mode, "*") == 0 || strcmp(mode, "*.*") == 0)select = 3;
+			else select = 4;
+		}//根据输入的命令行参数来判断执行不同操作
+		s = searchfile(path, argv[2], argv[3],select);
 	}
 	else printf("输入错误。\n");
 }
