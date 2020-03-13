@@ -9,7 +9,6 @@ int charactercount(char* filename) {//统计字符数
 	int c = 0;
 	char ch;
 	err = fopen_s(&fp, filename, "r");//打开对应文件
-	printf("%s\n", filename);
 	if (NULL == fp) {
 		printf("文件为空或不存在。\n");
 		return -1;
@@ -153,7 +152,7 @@ int searchfile(char* path, char* str1, char* str2) {//递归处理文件
 	strcat_s(way1, "*");
 	if ((Handle = _findfirst(way1, &file)) == -1L) {
 		printf("没有找到文件。\n");
-		x = -1;
+		x += -1;
 	}
 	else {
 		do {
@@ -161,36 +160,36 @@ int searchfile(char* path, char* str1, char* str2) {//递归处理文件
 				if ((strcmp(file.name, ".") != 0) && (strcmp(file.name, "..") != 0)) {
 					strcpy_s(way1, file.name);
 					strcat_s(way1, "\\");
-					searchfile(way1, str1, str2);
+					x += searchfile(way1, str1, str2);
 				}//拼接地址，递归继续查找
 			}
 			else {//根据输入的操作指令对文件进行操作
 				len = strlen(file.name);
 				if (file.name[len - 1] != 'c' && file.name[len - 2] != '.')continue;
-				if (strcmp(str2, "*.c") != 0 && strcmp(str2, file.name) != 0 )continue;
+				if (strcmp(str2, "*.c") != 0 && strcmp(str2, file.name) != 0)continue;
 				strcat_s(way2, file.name);
 				if (strcmp(str1, "-c") == 0) {
 					c = charactercount(way2);
 					if (c != -1)printf("%s文件中共有%d个字符。\n", file.name, c);
-					x = c;
+					x += c;
 				}
 				else if (strcmp(str1, "-w") == 0) {
 					w = wordcount(way2);
 					if (w != -1)printf("%s文件中共有%d个单词。\n", file.name, w);
-					x = w;
+					x += w;
 				}
 				else if (strcmp(str1, "-l") == 0) {
-					l = linecount1(way1);
+					l = linecount1(way2);
 					if (l != -1)printf("%s文件中共有%d行。\n", file.name, l);
-					x = l;
+					x += l;
 				}
 				else if (strcmp(str1, "-a") == 0) {
-					a = linecount2(file.name);
-					x = a;
+					a = linecount2(way2);
+					x += a;
 				}
 				else {
 					printf("输入操作错误。\n");
-					x = -1;
+					x += -1;
 				}
 			}
 		} while (_findnext(Handle, &file) == 0);
@@ -200,9 +199,9 @@ int searchfile(char* path, char* str1, char* str2) {//递归处理文件
 }
 
 int main(int argc, char* argv[]) {
-	int c = 0, w = 0, l = 0, a = 0, len = 0;
+	int c = 0, w = 0, l = 0, a = 0, x = 0;
 	char path[50] = { "\0" };
-	char mode='*';
+	char mode = '*';
 	if (strcmp(argv[1], "-c") == 0) {
 		c = charactercount(argv[2]);
 		printf("文件中的字符数为%d。\n", c);
@@ -219,7 +218,8 @@ int main(int argc, char* argv[]) {
 		a = linecount2(argv[2]);
 		if (a == 0)printf("文件为空。\n");
 	}
-	else if (strcmp(argv[1], "-s") == 0) 
-		searchfile(path, argv[2], argv[3]);
+	else if (strcmp(argv[1], "-s") == 0) {
+		x = searchfile(path, argv[2], argv[3]);
+	}
 	else printf("输入错误。\n");
 }
