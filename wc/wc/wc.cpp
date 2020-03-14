@@ -11,20 +11,20 @@ int charactercount(char *path,char *filename) {//统计字符数
 	char way[100] = { '\0' };
 	strcpy_s(way, path);
 	strcat_s(way, 100, filename);
-	err = fopen_s(&fp, way, "r");//打开对应文件
+	err = fopen_s(&fp, way, "r");
 	printf("路径：%s\n", way);
 	if (NULL == fp) {
 		printf("文件为空或不存在。\n");
 		return -1;
 	}
 	else {
-		while (feof(fp) == 0) {//当文件未结束时
+		while (feof(fp) == 0) {
 			ch = fgetc(fp);
 			if (ch != '\0' && ch != '\n')
 				c++;
 		}
 		c--;//使用feof函数读取字符要多读一次才能判断是否结束，因此要减1
-		fclose(fp);//关闭文件
+		fclose(fp);
 		return c;
 	}
 }
@@ -34,11 +34,11 @@ int wordcount(char*path,char* filename) {//统计词数
 	errno_t err;
 	int w = 0;
 	char ch;
-	bool flag = true;
+	bool mark = true;
 	char way[100] = { '\0' };
 	strcpy_s(way, path);
 	strcat_s(way, 100, filename);
-	err = fopen_s(&fp, way, "r");//打开对应文件
+	err = fopen_s(&fp, way, "r");
 	printf("路径：%s\n", way);
 	if (NULL == fp) {
 		printf("文件为空或不存在。\n");
@@ -47,13 +47,13 @@ int wordcount(char*path,char* filename) {//统计词数
 	else {
 		while (feof(fp) == 0) {
 			ch = fgetc(fp);
-			if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {//当该字符为字母时
-				if (flag == true) {
+			if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')|| ch >= '0' && ch <= '9') {
+				if (mark == true) {//当该字符为字母或数字且标记为true时，单词数加一
 					w++;
-					flag = false;
+					mark = false;
 				}
 			}
-			else flag = true;
+			else mark = true;//当该字符为其他字符时重置标志
 		}
 		fclose(fp);
 		return w;
@@ -68,7 +68,7 @@ int linecount1(char*path,char* filename) {//统计行数
 	char way[100] = { '\0' };
 	strcpy_s(way, path);
 	strcat_s(way, 100, filename);
-	err = fopen_s(&fp, way, "r");//打开对应文件
+	err = fopen_s(&fp, way, "r");
 	printf("路径：%s\n", way);
 	if (NULL == fp) {
 		printf("文件为空或不存在。\n");
@@ -76,7 +76,7 @@ int linecount1(char*path,char* filename) {//统计行数
 	}
 	else {
 		while (feof(fp) == 0) {
-			fgets(str, sizeof(str) - 1, fp);//fgets函数可以读取一整行
+			fgets(str, sizeof(str) - 1, fp);//读取一整行
 			l++;
 		}
 		fclose(fp);
@@ -87,13 +87,13 @@ int linecount1(char*path,char* filename) {//统计行数
 int linecount2(char*path,char* filename) {//统计空行、代码行和注释行
 	FILE* fp;
 	errno_t err;
-	int k = 0, d = 0, z = 0, i = 0, j = 0;
-	char str[100] = { 0 };
+	int k = 0, d = 0, z = 0, i;
 	bool flag, tag = true;
+	char str[100] = { '\0' };
 	char way[100] = { '\0' };
 	strcpy_s(way, path);
 	strcat_s(way, 100, filename);
-	err = fopen_s(&fp, way, "r");//打开对应文件
+	err = fopen_s(&fp, way, "r");
 	printf("路径：%s\n", way);
 	if (NULL == fp) {
 		printf("文件为空或不存在。\n");
@@ -102,48 +102,53 @@ int linecount2(char*path,char* filename) {//统计空行、代码行和注释行
 	else {
 		while (feof(fp) == 0) {
 			fgets(str, sizeof(str) - 1, fp);
-			for (; i <= sizeof(str); i++) {
-				flag = true;
-				if (((str[i] == '{' || str[i] == '}') && (str[i + 1] == '\0' || str[i + 1] == '\n')) || str[i] == '\n' || str[i] == '\0') {
-					k++;//空行
-					break;
-				}
-				else if ((str[i] == '/' && str[i + 1] == '/') || (str[i] == '}' && str[i + 1] == '/')) {
-					z++;//用“//”符号的注释行
-					break;
-				}
-				else if (str[i] == '/' && str[i + 1] == '*') {
-					z++;//用“/*”符号的多行注释
-					j = i + 2;
-					while (str[j] != '\n' && str[j] != '*' && str[j + 1] != '/')
-						j++;
-					if (str[j] == '\n')tag = false;//标记
-					break;
-				}
-				else if (str[i] != ' ' && str[i] != '\t' && str[i] != '\n') {
-					if (tag == true)d++;//代码行
-					else {//注释行
-						z++;
-						j = i++;
-						while (str[j] != '\n' && str[j] != '*' && str[j + 1] != '/')
-							j++;
-						if (str[j] == '*' && str[j + 1] == '/')
-							tag = true;//注释行结束，重置标记
-					}
-					break;
-				}
-				else if (str[i] == ' ' || str[i] == '\t') {
+			flag = true;
+			if (str[0] == '\n' || str[0] == '\0') {
+				k++;//空行，无内容的情况
+			}
+			else if (str[0] == '{' || str[0] == '}') {
+				if (str[1] == '\0' || str[1] == '\n')
+					k++;//空行，只有大括号的情况
+				else if (str[1] == '/' && str[2] == '/')
+					z++;//注释行，括号后跟注释的情况
+				else d++;
+			}
+			else if (str[0] == '/' && str[1] == '/') {
+				z++;//用“//”符号的注释行
+			}
+			else if (str[0] == '/' && str[1] == '*') {
+				z++;//用“/*”符号的多行注释
+				i = 2;
+				while (str[i] != '\n' && str[i] != '*' && str[i + 1] != '/')
 					i++;
-					while (str[i] != '\n') {
-						if (str[i] != ' ' && str[i] != '\t') {
-							d++;//代码前有位置控制符号
+				if (str[i] == '\n')tag = false;//标记
+			}
+			else {
+				if (tag == true) {//不是注释行
+					i = 0;
+					while (str[i] != '\n' && str[i] != '\0') {
+						if (str[i] == '/' && str[i + 1] == '*') {
+							z++;//多行注释的开始
+							tag = false;
+							break;
+						}
+						else if (str[i] != '\t' && str[i] != ' ') {
+							d++;//代码前可能有位置控制符号
 							flag = false;
 							break;
 						}
 						else i++;
 					}
-					if (flag == true)k++;//空行
-					break;
+					if (flag == true && tag == true) k++;
+				}
+				else {//注释行
+					z++;
+					i = 0;
+					while (str[i] != '\n' && str[i] != '\0') {
+						if (str[i] == '*' && str[i + 1] == '/')
+							tag = true;//注释行结束，重置标记
+						i++;
+					}
 				}
 			}
 		}
@@ -174,7 +179,7 @@ int searchfile(char *path, char *op, char *mode) {//递归处理文件
 	strcat_s(way2, mode);
 
 	if ((Handle1 = _findfirst(way1, &file1)) == -1L) {//Handle1查找所有文件
-		printf("%s中没有找到符合文件。\n",way4);
+		printf("%s中没有找到符合文件。\n", way4);
 	}
 	else {
 		do {
@@ -190,11 +195,11 @@ int searchfile(char *path, char *op, char *mode) {//递归处理文件
 	}
 
 	if ((Handle2 = _findfirst(way2, &file2)) == -1L) {//Handle2查找特定文件
-		printf("%s中没有找到符合文件。\n",way3);
+		printf("%s中没有找到符合文件。\n", way3);
 	}
 	else {
 		do {
-			if (file2.attrib & _A_SUBDIR)continue;
+			if (file2.attrib & _A_SUBDIR)continue;//文件夹不能查询
 			else if ((strcmp(file2.name, ".") == 0) || (strcmp(file2.name, "..") == 0))continue;
 			
 			if (strcmp(op, "-c") == 0) {
@@ -228,7 +233,10 @@ int searchfile(char *path, char *op, char *mode) {//递归处理文件
 
 void main(int argc, char* argv[]) {
 	int c = 0, w = 0, l = 0, a = 0, s = 0;
+	int len = 0, i = 0, j = 0;
 	char path[50] = { '\0' };
+	char mode[50] = { '\0' };
+	char str[100] = { '\0' };
 	if (strcmp(argv[1], "-c") == 0) {
 		c = charactercount(path,argv[2]);
 		printf("文件中的字符数为%d。\n", c);
@@ -245,7 +253,23 @@ void main(int argc, char* argv[]) {
 		a = linecount2(path,argv[2]);
 		if (a == 0)printf("文件为空。\n");
 	}
-	else if (strcmp(argv[1], "-s") == 0) 
-		s = searchfile(path, argv[2], argv[3]);
+	else if (strcmp(argv[1], "-s") == 0) {
+		len = strlen(argv[3]) - 1;
+		i = len;
+		strcpy_s(str, argv[3]);
+		while (i >= 0) {
+			if (str[i] == '\\')break;
+			else i--;
+		}
+		if (i >= 0) {
+			strncpy_s(path, str, i + 1);
+			while (i <= len) {
+				mode[j] = str[i];
+				j++; i++;
+			}
+		}
+		else strcpy_s(mode, argv[3]);
+		s = searchfile(path, argv[2], mode);
+	}
 	else printf("输入错误。\n");
 }
