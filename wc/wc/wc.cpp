@@ -266,7 +266,7 @@ void main(int argc, char* argv[]) {
 			while (i <= len) {
 				mode[j] = str[i];
 				j++; i++;
-			}
+			}//²ð·ÖÂ·¾¶
 		}
 		else strcpy_s(mode, argv[3]);
 		s = searchfile(path, argv[2], mode);
